@@ -1,0 +1,2132 @@
+; ==========================================
+; QUIZ INTERAKTIF 20 SOAL
+; EMU8086 / DOSBOX / TASM COMPATIBLE
+; ==========================================
+
+.model small
+.stack 100h
+
+.data
+
+menuPos db 0
+
+boxAtas db 13,10
+db '====================================',13,10
+db '          MENU UTAMA',13,10
+db '====================================',13,10,'$'
+
+boxBawah db '====================================',13,10,'$'
+
+pilih1 db '> Single Player',13,10,'$'
+normal1 db '  Single Player',13,10,'$'
+
+pilih2 db '> Multiplayer',13,10,'$'
+normal2 db '  Multiplayer',13,10,'$'
+
+pilih3 db '> Petunjuk',13,10,'$'
+normal3 db '  Petunjuk',13,10,'$'
+
+pilih4 db '> Tentang',13,10,'$'
+normal4 db '  Tentang',13,10,'$'
+
+pilih5 db '> Keluar',13,10,'$'
+normal5 db '  Keluar',13,10,'$'
+
+footerMenu db 13,10
+db '========================================',13,10
+db 'Gunakan PANAH Atas/Bawah lalu ENTER',13,10,'$'
+
+jumlahMenu equ 5
+
+modeGame db 0
+
+;==========================================
+; MENU HASIL
+;==========================================
+
+hasilPos db 0
+
+hasilHeader db 13,10
+db '========================================',13,10
+db '           QUIZ SELESAI',13,10
+db '========================================',13,10,'$'
+
+hasil1a db ' ? Main Lagi',13,10,'$'
+hasil1b db '   Main Lagi',13,10,'$'
+
+hasil2a db ' ? Kembali ke Menu',13,10,'$'
+hasil2b db '   Kembali ke Menu',13,10,'$'
+
+hasil3a db ' ? Keluar',13,10,'$'
+hasil3b db '   Keluar',13,10,'$'
+
+hasilFoter db 13,10
+db '========================================',13,10
+db 'Gunakan PANAH lalu ENTER',13,10,'$'
+
+;========================================
+; MENU KEMBALI
+;========================================
+
+kembaliPos db 0
+
+kembaliHeader db 13,10
+db '========================================',13,10
+db 'Pilih Menu',13,10
+db '========================================',13,10,'$'
+
+kembali1a db ' ? Kembali ke Menu Utama',13,10,'$'
+kembali1b db '   Kembali ke Menu Utama',13,10,'$'
+
+kembali2a db ' ? Keluar Program',13,10,'$'
+kembali2b db '   Keluar Program',13,10,'$'
+
+kembaliFooter db 13,10
+db '========================================',13,10
+db 'Gunakan PANAH lalu ENTER',13,10,'$'
+
+;==========================================
+; HASIL MULTIPLAYER
+;==========================================
+
+hasilMultiHeader db 13,10
+db '========================================================',13,10
+db '                HASIL MULTIPLAYER',13,10
+db '========================================================',13,10,'$'
+
+player1Label db 13,10,'PLAYER 1 : $'
+player2Label db 13,10,'PLAYER 2 : $'
+
+skorLabel db 13,10,'Skor     : $'
+
+garisMulti db 13,10
+db '--------------------------------------------------------',13,10,'$'
+
+menangMsg db 13,10,'PEMENANG : $'
+seriMsg db 13,10,'HASIL    : SERI$'
+
+trofi db 13,10
+db '*************** JUARA ***************',13,10,'$'
+
+;========================================
+; MENU MULTIPLAYER SELESAI
+;========================================
+
+multiPos db 0
+
+multiHeader db 13,10
+db '========================================',13,10
+db '      MULTIPLAYER SELESAI',13,10
+db '========================================',13,10,'$'
+
+multi1a db ' ? Main Multiplayer Lagi',13,10,'$'
+multi1b db '   Main Multiplayer Lagi',13,10,'$'
+
+multi2a db ' ? Kembali ke Menu Utama',13,10,'$'
+multi2b db '   Kembali ke Menu Utama',13,10,'$'
+
+multi3a db ' ? Keluar',13,10,'$'
+multi3b db '   Keluar',13,10,'$'
+
+multiFooter db 13,10
+db '========================================',13,10
+db 'Gunakan PANAH lalu ENTER',13,10,'$'
+
+;==============================
+; PLAYER 1
+;==============================
+
+nama1Msg db 13,10,'Masukkan Nama Player 1 : $'
+
+nama1Buff db 20
+db ?
+db 20 dup('$')
+
+skorP1 db 0
+
+;==============================
+; PLAYER 2
+;==============================
+
+nama2Msg db 13,10,'Masukkan Nama Player 2 : $'
+
+nama2Buff db 20
+db ?
+db 20 dup('$')
+
+skorP2 db 0
+
+;==============================
+; HASIL
+;==============================
+
+hasilMulti db 13,10,13,10
+db '===== HASIL MULTIPLAYER =====',13,10,'$'
+
+menang_Msg db 13,10,'Pemenang : $'
+seri_Msg db 13,10,'Hasil Seri!$'
+
+bannerMega db 13,10
+db '############################################################',13,10
+db '#                                                          #',13,10
+db '#   QQQQQ   U     U  IIIII  ZZZZZZZ                        #',13,10
+db '#  QQ   QQ  U     U    I        ZZ                         #',13,10
+db '#  QQ   QQ  U     U    I       ZZ                          #',13,10
+db '#  QQ Q QQ  U     U    I      ZZ                           #',13,10
+db '#  QQ  QQQ  U     U    I     ZZ                            #',13,10
+db '#   QQQQQQ   UUUUU   IIIII  ZZZZZZZ                        #',13,10
+db '#                                                          #',13,10
+db '#            I N T E R A K T I F                           #',13,10
+db '#                                                          #',13,10
+db '############################################################',13,10
+db '$'
+
+banner_start db 13,10
+db '=======================================================',13,10
+db '  ____   _____  _    ____ _____    ___  _   _ _ ____   ',13,10
+db ' / ___| |_   _|/ \  |  _ \    _|  / _ \| | | | |__  |  ',13,10
+db ' \___ \   | | / _ \ | |_) || |   | | | | | | | | / /   ',13,10
+db '  ___) |  | |/ ___ \|  _ < | |   | |_| | |_| | |/ /_   ',13,10
+db ' |____/   |_/_/   \_\_| \_\|_|    \__\_\\___/|_|____|  ',13,10
+db '=======================================================',13,10
+db '$'
+
+banner_hasil db 13,10
+db '******************************************************************',13,10
+db '*   ____     _     __  __ _____    _____ _     ______ ______     *',13,10
+db '*  / ___|   / \   |  \/  |  ___|  / ___ \ \   /  /___|   _  \    *',13,10
+db '* | | __   / _ \  | |\/| | |__   | |   | | \_/  /|__ |  |_)  |   *',13,10
+db '* | ||  | / /_\ \ | |  | |  __|  | |   | |     /  __||  __  /    *',13,10
+db '* | |_| |/  ___  \| |  | | |___  | |___| |\   /| |___|  | \  \   *',13,10
+db '*  \____/__/   \__\_|  |_|_____|  \_____/  \_/ |_____|__|  \__\  *',13,10
+db '*                                                                *',13,10
+db '******************************************************************',13,10
+db '$'
+
+rankingMsg db 13,10,'Ranking        : $'
+
+rankS db 'S$'
+rankA db 'A$'
+rankB db 'B$'
+rankC db 'C$'
+rankD db 'D$'
+
+menuUtama db 13,10
+db '========================',13,10
+db '      MENU UTAMA',13,10
+db '========================',13,10
+db '1. Single Player',13,10
+db '2. Multiplayer',13,10
+db '3. Petunjuk',13,10
+db '4. Tentang',13,10
+db '5. Keluar',13,10
+db 'Pilihan : $'
+
+petunjukMsg db 13,10
+db '===== PETUNJUK =====',13,10
+db '1. Pilih jawaban A/B/C',13,10
+db '2. Setiap jawaban benar = 5 poin',13,10
+db '3. Total ada 20 soal',13,10
+db 'Tekan tombol apapun untuk kembali...$'
+
+tentangMsg db 13,10
+db '===== TENTANG =====',13,10
+db 'Program Quiz Interaktif',13,10
+db 'Dibuat dengan Assembly 8086',13,10
+db 'Tekan tombol apapun untuk kembali...$'
+
+pilihan db ?
+
+garis1 db 13,10
+db '========================================',13,10,'$'
+
+garis2 db 13,10
+db '----------------------------------------',13,10,'$'
+
+tekanEnter db 13,10
+db 'Tekan ENTER untuk lanjut...$'
+
+namaLabel db 13,10
+db 'Nama Pemain : $'
+
+namaMsg db 13,10,'Masukkan Nama Anda : $'
+haloMsg db 13,10,'Halo, $'
+
+namaBuff db 20
+db ?
+db 20 dup('$')
+
+judul db 13,10
+db '========================================',13,10
+db '         QUIZ INTERAKTIF 8086',13,10
+db '========================================',13,10,'$'
+
+msgBenar db 13,10
+db '[?] JAWABAN BENAR!$'
+
+msgSalah db 13,10
+db '[X] JAWABAN SALAH!$'
+
+msgKunci db 13,10,'Jawaban yang benar : $'
+
+msgSkor db 13,10
+db '>> Skor        : $'
+
+hasil db 13,10,13,10
+db '========================================',13,10
+db '            HASIL QUIZ',13,10
+db '========================================',13,10
+db ' $'
+
+namaStat db 13,10,'Nama           : $'
+totalStat db 13,10,'Total Soal     : $'
+persenStat db 13,10,'Persentase     : $'
+
+kategoriMsg db 13,10,'Kategori       : $'
+
+sangatBaik db 'Sangat Baik$'
+baik db 'Baik$'
+cukup db 'Cukup$'
+belajar db 'Perlu Belajar Lagi$'
+
+benarCount db 0
+salahCount db 0
+
+msgBenarTotal db 13,10,'Jumlah Benar   : $'
+msgSalahTotal db 13,10,'Jumlah Salah   : $'
+
+;=========================
+; MENYIMPAN JAWABAN USER
+;=========================
+
+jawabanUser db 20 dup(0)
+
+skor db 0
+
+; ---------- SOAL ----------
+
+soal1 db 13,10,'1. Ibukota Indonesia?',13,10,13,10
+db 'A. Bandung',13,10
+db 'B. Jakarta',13,10
+db 'C. Surabaya',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci1 db 'B. Jakarta$'
+
+soal2 db 13,10,'2. 2 + 3 = ?',13,10,13,10
+db 'A. 4',13,10
+db 'B. 5',13,10
+db 'C. 6',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci2 db 'B. 5$'
+
+soal3 db 13,10,'3. Bahasa mesin komputer?',13,10,13,10
+db 'A. Binary',13,10
+db 'B. HTML',13,10
+db 'C. CSS',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci3 db 'A. Binary$'
+
+soal4 db 13,10,'4. Planet terbesar?',13,10,13,10
+db 'A. Mars',13,10
+db 'B. Venus',13,10
+db 'C. Jupiter',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci4 db 'C. Jupiter$'
+
+soal5 db 13,10,'5. 3 x 2 = ?',13,10,13,10
+db 'A. 6',13,10
+db 'B. 8',13,10
+db 'C. 9',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci5 db 'A. 6$'
+
+soal6 db 13,10,'6. Warna bendera Indonesia?',13,10,13,10
+db 'A. Merah Putih',13,10
+db 'B. Merah Hijau',13,10
+db 'C. Biru Putih',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci6 db 'A. Merah Putih$'
+
+soal7 db 13,10,'7. 7 x 8 = ?',13,10,13,10
+db 'A. 54',13,10
+db 'B. 56',13,10
+db 'C. 58',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci7 db 'B. 56$'
+
+soal8 db 13,10,'8. Negara dengan penduduk terbesar di Asia Tenggara?',13,10,13,10
+db 'A. Malaysia',13,10
+db 'B. Thailand',13,10
+db 'C. Indonesia',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci8 db 'C. Indonesia$'
+
+soal9 db 13,10,'9. Jumlah sila Pancasila?',13,10,13,10
+db 'A. 5',13,10
+db 'B. 4',13,10
+db 'C. 6',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci9 db 'A. 5$'
+
+soal10 db 13,10,'10. Presiden pertama Indonesia?',13,10,13,10
+db 'A. Soekarno',13,10
+db 'B. Soeharto',13,10
+db 'C. Habibie',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci10 db 'A. Soekarno$'
+
+soal11 db 13,10,'11. Hewan yang bisa hidup di air dan darat disebut...',13,10,13,10
+db 'A. Mamalia',13,10
+db 'B. Reptil',13,10
+db 'C. Amfibi',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci11 db 'C. Amfibi$'
+
+soal12 db 13,10,'12. Siapakah pencipta lagu kebangsaan "Indonesia Raya"?',13,10,13,10
+db 'A. Ibu Sud',13,10
+db 'B. W.R.Supratman',13,10
+db 'C. Simanjuntak',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci12 db 'B. W.R.Supratman$'
+
+soal13 db 13,10,'13. Gas yang paling banyak kita hirup saat bernapas adalah...',13,10,13,10
+db 'A. Oksigen',13,10
+db 'B. Nitrogen',13,10
+db 'C. Karbondioksida',13,10,13,10
+db 'Jawaban anda : $'
+
+kunci13 db 'B. Nitrogen$'
+
+soal14 db 13,10,'14. Benua terbesar di dunia adalah...',13,10,13,10
+db 'A. Benua Afrika',13,10
+db 'B. Benua Amerika',13,10
+db 'C. Benua Asia',13,10,13,10
+db 'Jabawan Anda : $'
+
+kunci14 db 'C. Benua Asia$'
+
+soal15 db 13,10,'15. Monumen Nasional (Monas) terletak di kota...',13,10,13,10
+db 'A. Yogyakarta',13,10
+db 'B. Jakarta',13,10
+db 'C. Semarang',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci15 db 'B. Jakarta$'
+
+soal16 db 13,10,'16. Alat untuk mengukur suhu udara dinamakan...',13,10,13,10
+db 'A. Barometer',13,10
+db 'B. Termometer',13,10
+db 'C. Higrometer',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci16 db 'B. Termometer$'
+
+soal17 db 13,10,'17. Lambang negara Indonesia adalah...',13,10,13,10
+db 'A. Burung Garuda',13,10
+db 'B. Bendera Merah Putih',13,10
+db 'C. Keris',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci17 db 'A. Burung Garuda$'
+
+soal18 db 13,10,'18. Candi Borobudur merupakan candi peninggalan agama...',13,10,13,10
+db 'A. Hindu',13,10
+db 'B. Buddha',13,10
+db 'C. Islam',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci18 db 'B. Buddha$'
+
+soal19 db 13,10,'19. Vitamin yang banyak terkandung dalam buah jeruk adalah...',13,10,13,10
+db 'A. Vitamin A',13,10
+db 'B. Vitamin B',13,10
+db 'C. Vitamin C',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci19 db 'C. Vitamin C$'
+
+soal20 db 13,10,'20. Bagian tumbuhan yang berfungsi menyerap air dari dalam tanah adalah...',13,10,13,10
+db 'A. Daun',13,10
+db 'B. Batang',13,10
+db 'C. Akar',13,10,13,10
+db 'Jawaban Anda : $'
+
+kunci20 db 'C. Akar$'
+
+
+.code
+
+main proc
+
+mov ax,@data
+mov ds,ax
+
+lea dx,bannerMega
+mov ah,09h
+int 21h
+
+call menu
+
+main endp
+
+main_quiz proc
+
+lea dx,banner_start
+mov ah,09h
+int 21h
+
+; =====================
+; SOAL 1
+; =====================
+
+lea dx,soal1
+mov bl,'B'
+lea si,kunci1
+call proses_soal
+
+; =====================
+; SOAL 2
+; =====================
+
+lea dx,soal2
+mov bl,'B'
+lea si,kunci2
+call proses_soal
+
+; =====================
+; SOAL 3
+; =====================
+
+lea dx,soal3
+mov bl,'A'
+lea si,kunci3
+call proses_soal
+
+; =====================
+; SOAL 4
+; =====================
+
+lea dx,soal4
+mov bl,'C'
+lea si,kunci4
+call proses_soal
+
+; =====================
+; SOAL 5
+; =====================
+
+lea dx,soal5
+mov bl,'A'
+lea si,kunci5
+call proses_soal
+
+; =====================
+; SOAL 6
+; =====================
+
+lea dx,soal6
+mov bl,'A'
+lea si,kunci6
+call proses_soal
+
+; =====================
+; SOAL 7
+; =====================
+
+lea dx,soal7
+mov bl,'B'
+lea si,kunci7
+call proses_soal
+
+; =====================
+; SOAL 8
+; =====================
+
+lea dx,soal8
+mov bl,'C'
+lea si,kunci8
+call proses_soal
+
+; =====================
+; SOAL 9
+; =====================
+
+lea dx,soal9
+mov bl,'A'
+lea si,kunci9
+call proses_soal
+
+; =====================
+; SOAL 10
+; =====================
+
+lea dx,soal10
+mov bl,'A'
+lea si,kunci10
+call proses_soal
+
+;======================
+;SOAL 11
+;======================
+
+lea dx,soal11
+mov bl,'C'
+lea si,kunci11
+call proses_soal
+
+;======================
+;SOAL 12
+;======================
+
+lea dx,soal12
+mov bl,'B'
+lea si,kunci12
+call proses_soal
+
+;======================
+;SOAL 13
+;======================
+
+lea dx,soal13
+mov bl,'B'
+lea si,kunci13
+call proses_soal
+
+;======================
+;SOAL 14
+;======================
+
+lea dx,soal14
+mov bl,'C'
+lea si,kunci14
+call proses_soal
+
+;======================
+;SOAL 15
+;======================
+
+lea dx,soal15
+mov bl,'B'
+lea si,kunci15
+call proses_soal
+
+;======================
+;SOAL 16
+;======================
+
+lea dx,soal16
+mov bl,'B'
+lea si,kunci16
+call proses_soal
+
+;======================
+;SOAL 17
+;======================
+
+lea dx,soal17
+mov bl,'A'
+lea si,kunci17
+call proses_soal
+
+;======================
+;SOAL 18
+;======================
+
+lea dx,soal18
+mov bl,'B'
+lea si,kunci18
+call proses_soal
+
+;======================
+;SOAL 19
+;======================
+
+lea dx,soal19
+mov bl,'C'
+lea si,kunci19
+call proses_soal
+
+;======================
+;SOAL 20
+;======================
+
+lea dx,soal20
+mov bl,'C'
+lea si,kunci20
+call proses_soal
+
+ret
+
+main_quiz endp
+
+;==================
+;BERSIHKAN LAYAR
+;==================
+
+cls proc
+
+mov ax,0003h
+int 10h
+
+ret
+cls endp
+
+;==================
+;BEEP
+;==================
+
+beep proc
+
+mov dl,7
+mov ah,02h
+int 21h
+
+ret
+
+beep endp
+
+;==================
+;POSISI CURSOR
+;==================
+
+gotoxy proc
+
+; DH = baris
+; DL = kolom
+
+mov bh,0
+mov ah,02h
+int 10h
+
+ret
+gotoxy endp
+
+;==================
+;WARNA TULISAN
+;==================
+
+warna proc
+
+; BL = warna
+
+mov ah,09h
+mov bh,0
+mov cx,1
+
+int 10h
+
+ret
+warna endp
+
+;=================
+;GAMBAR MENU
+;=================
+
+gambar_menu proc
+
+call cls
+
+lea dx,bannerMega
+mov ah,09h
+int 21h
+
+;==============================
+; Header
+;==============================
+
+lea dx,boxAtas
+mov ah,09h
+int 21h
+
+;==============================
+; Menu 1
+;==============================
+
+cmp menuPos,0
+jne gm2
+
+lea dx,pilih1
+mov ah,09h
+int 21h
+jmp gm1_next
+
+gm2:
+lea dx,normal1
+mov ah,09h
+int 21h
+
+gm1_next:
+
+;==============================
+; Menu 2
+;==============================
+
+cmp menuPos,1
+jne gm3
+
+lea dx,pilih2
+mov ah,09h
+int 21h
+jmp gm2_next
+
+gm3:
+lea dx,normal2
+mov ah,09h
+int 21h
+
+gm2_next:
+
+;==============================
+; Menu 3
+;==============================
+
+cmp menuPos,2
+jne gm4
+
+lea dx,pilih3
+mov ah,09h
+int 21h
+jmp gm3_next
+
+gm4:
+lea dx,normal3
+mov ah,09h
+int 21h
+
+gm3_next:
+
+;==============================
+; Menu 4
+;==============================
+
+cmp menuPos,3
+jne gm5
+
+lea dx,pilih4
+mov ah,09h
+int 21h
+jmp gm4_next
+
+gm5:
+lea dx,normal4
+mov ah,09h
+int 21h
+
+gm4_next:
+
+;==============================
+; Menu 5
+;==============================
+
+cmp menuPos,4
+jne gm6
+
+lea dx,pilih5
+mov ah,09h
+int 21h
+jmp gm5_next
+
+gm6:
+lea dx,normal5
+mov ah,09h
+int 21h
+
+gm5_next:
+
+;==============================
+; Footer
+;==============================
+
+lea dx,boxBawah
+mov ah,09h
+int 21h
+
+lea dx,footerMenu
+mov ah,09h
+int 21h
+
+ret
+
+gambar_menu endp
+
+; ==================
+; SINGLE PLAYER
+; input_nama
+; ==================
+
+input_nama proc
+
+; INPUT NAMA
+lea dx,namaMsg
+mov ah,09h
+int 21h
+
+lea dx,namaBuff
+mov ah,0Ah
+int 21h
+
+mov si,offset namaBuff+2
+mov cl,[namaBuff+1]
+mov ch,0
+add si,cx
+mov byte ptr [si],'$'
+
+; SAPAAN
+
+lea dx,haloMsg
+mov ah,09h
+int 21h
+
+lea dx,namaLabel
+mov ah,09h
+int 21h
+
+lea dx,namaBuff+2
+mov ah,09h
+int 21h
+
+ret
+
+input_nama endp
+
+;===================================
+; MULTIPLAYER
+; Input player 1
+;===================================
+
+input_player1 proc
+
+mov ax,0003h
+int 10h
+
+lea dx,nama1Msg
+mov ah,09h
+int 21h
+
+lea dx,nama1Buff
+mov ah,0Ah
+int 21h
+
+mov si,offset nama1Buff+2
+mov cl,[nama1Buff+1]
+mov ch,0
+add si,cx
+mov byte ptr [si],'$'
+
+lea dx,haloMsg
+mov ah,09h
+int 21h
+
+lea dx,namaLabel
+mov ah,09h
+int 21h
+
+lea dx,nama1Buff+2
+mov ah,09h
+int 21h
+
+ret
+
+input_player1 endp
+
+reset_quiz proc
+
+mov skor,0
+mov benarCount,0
+mov salahCount,0
+
+mov cx,20
+mov di,offset jawabanUser
+
+resetLoop:
+
+mov byte ptr [di],0
+inc di
+
+loop resetLoop
+
+ret
+
+reset_quiz endp
+
+input_player2 proc
+
+mov ax,0003h
+int 10h
+
+lea dx,nama2Msg
+mov ah,09h
+int 21h
+
+lea dx,nama2Buff
+mov ah,0Ah
+int 21h
+
+mov si,offset nama2Buff+2
+mov cl,[nama2Buff+1]
+mov ch,0
+add si,cx
+mov byte ptr [si],'$'
+
+lea dx,haloMsg
+mov ah,09h
+int 21h
+
+lea dx,namaLabel
+mov ah,09h
+int 21h
+
+lea dx,nama2Buff+2
+mov ah,09h
+int 21h
+
+ret
+
+input_player2 endp
+
+;===================
+;multiplayer
+;===================
+
+multiplayer proc
+
+call reset_quiz
+
+;=====================
+; PLAYER 1
+;=====================
+
+call input_player1
+
+call main_quiz
+
+mov al,skor
+mov skorP1,al
+
+;=====================
+; PLAYER 2
+;=====================
+
+call reset_quiz
+
+call input_player2
+
+call main_quiz
+
+mov al,skor
+mov skorP2,al
+
+;=====================
+; HASIL
+;=====================
+
+call cls
+
+call multiplayer_hasil
+
+call menu_multi_hasil
+
+ret
+
+multiplayer endp
+multiplayer_hasil proc
+
+lea dx,hasilMultiHeader
+mov ah,09h
+int 21h
+
+;=========================
+; PLAYER 1
+;=========================
+
+lea dx,player1Label
+mov ah,09h
+int 21h
+
+lea dx,nama1Buff+2
+mov ah,09h
+int 21h
+
+lea dx,skorLabel
+mov ah,09h
+int 21h
+
+mov al,skorP1
+call cetak_angka
+
+lea dx,garisMulti
+mov ah,09h
+int 21h
+
+;=========================
+; PLAYER 2
+;=========================
+
+lea dx,player2Label
+mov ah,09h
+int 21h
+
+lea dx,nama2Buff+2
+mov ah,09h
+int 21h
+
+lea dx,skorLabel
+mov ah,09h
+int 21h
+
+mov al,skorP2
+call cetak_angka
+
+lea dx,garisMulti
+mov ah,09h
+int 21h
+
+;=========================
+; PEMENANG
+;=========================
+
+mov al,skorP1
+cmp al,skorP2
+ja p1
+
+jb p2
+
+lea dx,seriMsg
+mov ah,09h
+int 21h
+
+ret
+
+p1:
+
+lea dx,trofi
+mov ah,09h
+int 21h
+
+lea dx,menangMsg
+mov ah,09h
+int 21h
+
+lea dx,nama1Buff+2
+mov ah,09h
+int 21h
+
+ret
+
+p2:
+
+lea dx,trofi
+mov ah,09h
+int 21h
+
+lea dx,menangMsg
+mov ah,09h
+int 21h
+
+lea dx,nama2Buff+2
+mov ah,09h
+int 21h
+
+ret
+
+multiplayer_hasil endp
+
+cetak_angka proc
+
+cmp al,100
+jne duaDigit
+
+mov dl,'1'
+mov ah,02h
+int 21h
+
+mov dl,'0'
+int 21h
+
+mov dl,'0'
+int 21h
+
+ret
+
+duaDigit:
+
+xor ah,ah
+mov bl,10
+div bl
+
+add al,'0'
+mov dl,al
+mov ah,02h
+int 21h
+
+mov al,ah
+add al,'0'
+mov dl,al
+int 21h
+
+ret
+
+cetak_angka endp
+
+;==================================
+; Menu_hasil
+;==================================
+
+gambar_menu_hasil proc
+
+
+
+lea dx,hasilHeader
+mov ah,09h
+int 21h
+
+;======================
+; MAIN LAGI
+;======================
+
+cmp hasilPos,0
+jne hm2
+
+lea dx,hasil1a
+jmp hmCetak1
+
+hm2:
+lea dx,hasil1b
+
+hmCetak1:
+mov ah,09h
+int 21h
+
+;======================
+; MENU
+;======================
+
+cmp hasilPos,1
+jne hm3
+
+lea dx,hasil2a
+jmp hmCetak2
+
+hm3:
+lea dx,hasil2b
+
+hmCetak2:
+mov ah,09h
+int 21h
+
+;======================
+; KELUAR
+;======================
+
+cmp hasilPos,2
+jne hm4
+
+lea dx,hasil3a
+jmp hmCetak3
+
+hm4:
+lea dx,hasil3b
+
+hmCetak3:
+mov ah,09h
+int 21h
+
+lea dx,hasilFoter
+mov ah,09h
+int 21h
+
+ret
+
+gambar_menu_hasil endp
+
+;==================
+;Menu hasil
+;==================
+
+menu_hasil proc
+
+mov hasilPos,0
+
+menu_hasil_loop:
+
+call gambar_menu_hasil
+
+mov ah,00h
+int 16h
+
+;======================
+; PANAH ATAS
+;======================
+
+cmp ah,48h
+je hasil_atas
+
+;======================
+; PANAH BAWAH
+;======================
+
+cmp ah,50h
+je hasil_bawah
+
+;======================
+; ENTER
+;======================
+
+cmp ah,1Ch
+je hasil_enter
+
+jmp menu_hasil_loop
+
+;======================
+; ATAS
+;======================
+
+hasil_atas:
+
+cmp hasilPos,0
+je menu_hasil_loop
+
+dec hasilPos
+call beep
+
+jmp menu_hasil_loop
+
+;======================
+; BAWAH
+;======================
+
+hasil_bawah:
+
+cmp hasilPos,2
+je menu_hasil_loop
+
+inc hasilPos
+call beep
+
+jmp menu_hasil_loop
+
+;======================
+; ENTER
+;======================
+
+hasil_enter:
+
+cmp hasilPos,0
+je main_lagi
+
+cmp hasilPos,1
+je kembali_menu
+
+cmp hasilPos,2
+je keluar_program
+
+jmp menu_hasil_loop
+
+;======================
+; MAIN LAGI
+;======================
+
+main_lagi:
+
+call cls
+call reset_quiz
+
+cmp modeGame,1
+je ulang_single
+
+cmp modeGame,2
+je ulang_multi
+
+ulang_single:
+
+call reset_quiz
+call input_nama
+call main_quiz
+call tampil_hasil
+jmp menu_hasil
+
+ulang_multi:
+
+call multiplayer
+ret
+
+;======================
+; MENU UTAMA
+;======================
+
+kembali_menu:
+
+call cls
+call menu
+ret
+
+;======================
+; KELUAR
+;======================
+
+keluar_program:
+
+mov ah,4Ch
+int 21h
+
+menu_hasil endp
+
+;======================
+;MENU KEMBALI
+;======================
+
+gambar_menu_kembali proc
+
+
+
+lea dx,kembaliHeader
+mov ah,09h
+int 21h
+
+;=========================
+; MENU 1
+;=========================
+
+cmp kembaliPos,0
+jne km2
+
+lea dx,kembali1a
+jmp cetak1
+
+km2:
+lea dx,kembali1b
+
+cetak1:
+mov ah,09h
+int 21h
+
+;=========================
+; MENU 2
+;=========================
+
+cmp kembaliPos,1
+jne km3
+
+lea dx,kembali2a
+jmp cetak2
+
+km3:
+lea dx,kembali2b
+
+cetak2:
+mov ah,09h
+int 21h
+
+lea dx,kembaliFooter
+mov ah,09h
+int 21h
+
+ret
+
+gambar_menu_kembali endp
+
+;Menu kembali
+
+menu_kembali proc
+
+mov kembaliPos,0
+
+ulang_menu:
+
+call gambar_menu_kembali
+
+mov ah,00h
+int 16h
+
+cmp ah,48h
+je atas
+
+cmp ah,50h
+je bawah
+
+cmp ah,1Ch
+je enter
+
+jmp ulang_menu
+
+;=========================
+; PANAH ATAS
+;=========================
+
+atas_panah:
+
+cmp kembaliPos,0
+je ulang_menu
+
+dec kembaliPos
+call beep
+
+jmp ulang_menu
+
+;=========================
+; PANAH BAWAH
+;=========================
+
+bawah_panah:
+
+cmp kembaliPos,1
+je ulang_menu
+
+inc kembaliPos
+call beep
+
+jmp ulang_menu
+
+;=========================
+; ENTER
+;=========================
+
+enter_kembali:
+
+cmp kembaliPos,0
+je kembalii
+
+cmp kembaliPos,1
+je keluarr
+
+jmp ulang_menu
+
+kembalii:
+
+call cls
+call menu
+ret
+
+keluarr:
+
+mov ah,4Ch
+int 21h
+
+menu_kembali endp
+
+;=======================
+;MULTI KELUAR
+;=======================
+
+gambar_menu_multi proc
+
+
+
+lea dx,multiHeader
+mov ah,09h
+int 21h
+
+;==========================
+; MENU 1
+;==========================
+
+cmp multiPos,0
+jne mm2
+
+lea dx,multi1a
+jmp cetak1_m
+
+mm2:
+lea dx,multi1b
+
+cetak1_m:
+mov ah,09h
+int 21h
+
+;==========================
+; MENU 2
+;==========================
+
+cmp multiPos,1
+jne mm3
+
+lea dx,multi2a
+jmp cetak2_m
+
+mm3:
+lea dx,multi2b
+
+cetak2_m:
+mov ah,09h
+int 21h
+
+;==========================
+; MENU 3
+;==========================
+
+cmp multiPos,2
+jne mm4
+
+lea dx,multi3a
+jmp cetak3_m
+
+mm4:
+lea dx,multi3b
+
+cetak3_m:
+mov ah,09h
+int 21h
+
+lea dx,multiFooter
+mov ah,09h
+int 21h
+
+ret
+
+gambar_menu_multi endp
+
+;MENU MULTI
+
+menu_multi_hasil proc
+
+mov multiPos,0
+
+menu_loop:
+
+call gambar_menu_multi
+
+mov ah,00h
+int 16h
+
+cmp ah,48h
+je atas
+
+cmp ah,50h
+je bawah
+
+cmp ah,1Ch
+je enter
+
+jmp menu_loop
+
+;==========================
+; PANAH ATAS
+;==========================
+
+atas_m:
+
+cmp multiPos,0
+je menu_loop
+
+dec multiPos
+call beep
+jmp menu_loop
+
+;==========================
+; PANAH BAWAH
+;==========================
+
+bawah_m:
+
+cmp multiPos,2
+je menu_loop
+
+inc multiPos
+call beep
+jmp menu_loop
+
+;==========================
+; ENTER
+;==========================
+
+enter_m:
+
+cmp multiPos,0
+je ulang_m
+
+cmp multiPos,1
+je kembali_m
+
+cmp multiPos,2
+je keluar_m
+
+jmp menu_loop
+
+;==========================
+; MAIN LAGI
+;==========================
+
+ulang_m:
+
+call reset_quiz
+call multiplayer
+ret
+
+;==========================
+; MENU
+;==========================
+
+kembali_m:
+
+call cls
+call menu
+ret
+
+;==========================
+; KELUAR
+;==========================
+
+keluar_m:
+
+mov ah,4Ch
+int 21h
+
+menu_multi_hasil endp
+
+
+; ==================================
+; PROC PROSES SOAL
+; DX = alamat soal
+; BL = jawaban benar
+; SI = alamat kunci
+; ==================================
+
+proses_soal proc
+
+mov ah,09h
+int 21h
+
+mov ah,01h
+int 21h
+
+cmp al,bl
+je benar
+
+sub bl,20h
+cmp al,bl
+je benar
+
+; SALAH
+
+inc salahCount
+
+lea dx,msgSalah
+mov ah,09h
+int 21h
+
+lea dx,msgKunci
+mov ah,09h
+int 21h
+
+mov dx,si
+mov ah,09h
+int 21h
+
+call tampil_skor
+
+lea dx,garis2
+mov ah,09h
+int 21h
+
+ret
+
+benar:
+
+add skor,5
+inc benarCount
+
+lea dx,msgBenar
+mov ah,09h
+int 21h
+
+call tampil_skor
+
+lea dx,garis2
+mov ah,09h
+int 21h
+
+ret
+
+proses_soal endp
+
+; ==================================
+; PROC TAMPIL SKOR
+; ==================================
+
+tampil_skor proc
+
+lea dx,msgSkor
+mov ah,09h
+int 21h
+
+mov al,skor
+
+cmp al,100
+jne lanjut
+
+mov dl,'1'
+mov ah,02h
+int 21h
+
+mov dl,'0'
+int 21h
+
+mov dl,'0'
+int 21h
+
+ret
+
+lanjut:
+
+xor ah,ah
+mov bl,10
+div bl
+
+add al,'0'
+mov dl,al
+mov ah,02h
+int 21h
+
+mov al,ah
+add al,'0'
+mov dl,al
+int 21h
+
+ret
+
+tampil_skor endp
+
+; ==================================
+; PROC HASIL AKHIR
+; ==================================
+
+tampil_angka proc
+
+xor ah,ah
+mov bl,10
+div bl
+
+cmp al,0
+je satu_digit
+
+add al,'0'
+mov dl,al
+mov ah,02h
+int 21h
+
+satu_digit:
+mov al,ah
+add al,'0'
+mov dl,al
+mov ah,02h
+int 21h
+
+ret
+
+tampil_angka endp
+
+tampil_ranking proc
+
+lea dx,rankingMsg
+mov ah,09h
+int 21h
+
+mov al,skor
+
+cmp al,90
+jae rank_s
+
+cmp al,80
+jae rank_a
+
+cmp al,70
+jae rank_b
+
+cmp al,60
+jae rank_c
+
+jmp rank_d
+
+rank_s:
+lea dx,rankS
+jmp cetak_rank
+
+rank_a:
+lea dx,rankA
+jmp cetak_rank
+
+rank_b:
+lea dx,rankB
+jmp cetak_rank
+
+rank_c:
+lea dx,rankC
+jmp cetak_rank
+
+rank_d:
+lea dx,rankD
+
+cetak_rank:
+mov ah,09h
+int 21h
+
+ret
+
+tampil_ranking endp
+
+tampil_hasil proc
+
+
+lea dx,banner_hasil
+mov ah,09h
+int 21h
+
+lea dx,hasil
+mov ah,09h
+int 21h
+
+lea dx,namaStat
+mov ah,09h
+int 21h
+
+lea dx,namaBuff+2
+mov ah,09h
+int 21h
+
+lea dx,totalStat
+mov ah,09h
+int 21h
+
+mov al,20
+call tampil_angka
+
+; tampil jumlah benar
+
+lea dx,msgBenarTotal
+mov ah,09h
+int 21h
+
+mov al,benarCount
+call tampil_angka
+
+; tampil jumlah salah
+
+lea dx,msgSalahTotal
+mov ah,09h
+int 21h
+
+mov al,salahCount
+call tampil_angka
+
+call tampil_skor
+
+lea dx,persenStat
+mov ah,09h
+int 21h
+
+mov al,benarCount
+mov bl,5
+mul bl          ; benar × 5 = %
+
+call tampil_angka
+
+mov dl,'%'
+mov ah,02h
+int 21h
+
+
+call tampil_ranking
+
+lea dx,kategoriMsg
+mov ah,09h
+int 21h
+
+mov al,skor
+
+cmp al,90
+jae sangat_baik
+
+cmp al,70
+jae baik_label
+
+cmp al,50
+jae cukup_label
+
+jmp belajar_label
+
+sangat_baik:
+lea dx,sangatBaik
+jmp cetak
+
+baik_label:
+lea dx,baik
+jmp cetak
+
+cukup_label:
+lea dx,cukup
+jmp cetak
+
+belajar_label:
+lea dx,belajar
+
+cetak:
+mov ah,09h
+int 21h
+
+ret
+
+tampil_hasil endp
+
+set_warna proc
+
+; BL = atribut warna
+mov ah,09h
+mov bh,0
+mov cx,1
+
+ret
+
+set_warna endp
+
+menu proc
+
+mov menuPos,0
+
+ulang:
+
+call gambar_menu
+
+mov ah,00h
+int 16h
+
+cmp ah,48h
+je atas
+
+cmp ah,50h
+je bawah
+
+cmp ah,1Ch
+je enter
+
+jmp ulang
+
+atas:
+
+cmp menuPos,0
+je ulang
+
+dec menuPos
+jmp ulang
+
+bawah:
+
+cmp menuPos,4
+je ulang
+
+inc menuPos
+jmp ulang
+
+enter:
+
+cmp menuPos,0
+je single_player
+
+cmp menuPos,1
+je multiplayer
+
+cmp menuPos,2
+je petunjuk
+
+cmp menuPos,3
+je tentang
+
+cmp menuPos,4
+je keluar
+
+
+
+tampil_menu:
+
+; tampil menu
+lea dx,menuUtama
+mov ah,09h
+int 21h
+
+mov ah,01h
+int 21h
+
+cmp al,'1'
+je single_player
+
+cmp al,'2'
+je mode_multi
+
+cmp al,'3'
+je petunjuk
+
+cmp al,'4'
+je tentang
+
+cmp al,'5'
+je keluar
+
+jmp tampil_menu
+
+mode_multi:
+mov modeGame,2
+call multiplayer
+call multiplayer_hasil
+
+call menu_multi_hasil
+
+ret
+
+single_player:
+
+call cls
+mov modeGame,1
+call input_nama
+call main_quiz
+call tampil_hasil
+call menu_hasil
+
+ret
+
+petunjuk:
+
+call cls
+
+lea dx,petunjukMsg
+mov ah,09h
+int 21h
+
+call menu_kembali
+
+ret
+
+tentang:
+
+call cls
+
+lea dx,tentangMsg
+mov ah,09h
+int 21h
+
+call menu_kembali
+
+ret
+
+keluar:
+mov ah,4Ch
+int 21h
+
+menu endp
+
+end main
+
+
+
+
+; [SOURCE]: C:\Users\ASUS\Documents\UAS 4\PBR3\QUIZ_QUEST.asm
